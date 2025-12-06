@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>接案板 MVP</title>
+<style>
+body { font-family: Arial; margin: 20px; }
+.case { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
+</style>
+</head>
+<body>
+<h1>接案板 MVP</h1>
+<div id="cases"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script>
+const sheetCSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSRPzfYS3cocpBgFVUCe8uAXDc4orPZgdC-ijxinhoMObm0ccFsyvpWtI0pIrmSgkM5Q4vcg1C8Ue80/pub?gid=1304270105&single=true&output=csv';
+
+Papa.parse(sheetCSV, {
+    download: true,
+    header: true,
+    complete: function(results) {
+        const data = results.data;
+        // 排序，最新在前
+        data.sort((a, b) => parseTime(b['時間戳記']) - parseTime(a['時間戳記']));
+        const container = document.getElementById('cases');
+        data.forEach(item => {
+            // 過濾空案
+            if (!item['案名']) return;
+            // 判斷截止日期
+            const today = new Date();
+            const deadline = new Date(item['截止日期']);
+            if (deadline < today) return;
+
+            const div = document.createElement('div');
+            div.className = 'case';
+            div.innerHTML = `
+                <h3>${item['案名']}</h3>
+                <p><strong>發佈時間:</strong> ${item['時間戳記']}</p>
+                <p><strong>描述:</strong> ${item['描述']}</p>
+                <p><strong>類別:</strong> ${item['類別']}</p>
+                <p><strong>預算:</strong> ${item['預算']}</p>
+                <p><strong>截止日期:</strong> ${item['截止日期']}</p>
+                <p><strong>聯絡方式:</strong> ${item['聯絡方式']}</p>
+            `;
+            container.appendChild(div);
+        });
+    }
+});
+
+// 先把上午/下午轉成24小時制
+function parseTime(str) {
+    let [datePart, timePart, hhmmss] = str.split(' ');
+    let isPM = timePart.includes('下午');
+    let [h, m, s] = hhmmss.split(':').map(Number);
+
+    if (isPM && h < 12) h += 12;
+    if (!isPM && h === 12) h = 0;
+
+    return new Date(`${datePart} ${h.toString().padStart(2, '0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`);
+}
+</script>
+</body>
+</html>
