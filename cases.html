@@ -65,11 +65,12 @@ Papa.parse(sheetCSV, {
             const deadline = new Date(item['截止日期']);
             if (deadline < today) return;
 
+            var uuid = _uuid();
             const div = document.createElement('div');
             div.className = 'col';
             div.innerHTML = `
                     <div class="card h-100 shadow-sm">
-                        <div class="card-body">
+                        <div class="card-body" id="${uuid}">
                             <h5 class="card-title">${item['案名']}</h5>
                             <p class="card-text"><strong>發佈時間:</strong> ${item['時間戳記']}</p>
                             <p class="card-text"><strong>描述:</strong> <br>${item['描述']}</p>
@@ -77,7 +78,7 @@ Papa.parse(sheetCSV, {
                             <p class="card-text"><strong>預算:</strong> ${item['預算']}</p>
                             <p class="card-text"><strong>截止日期:</strong> ${item['截止日期']}</p>
                             <p class="card-text"><strong>聯絡方式:</strong> <br>
-                                <span id="contact"></span>
+                                <span class="contact"></span>
                             </p>
                         </div>
                     </div>
@@ -85,7 +86,7 @@ Papa.parse(sheetCSV, {
             container.appendChild(div);
             const contactText = item['聯絡方式'];
             const formattedText = linkify(contactText);
-            document.getElementById('contact').innerHTML = formattedText;
+            document.getElementById(uuid).getElementsByClassName("contact")[0].innerHTML = formattedText;
         });
     }
 });
@@ -110,6 +111,18 @@ function parseTime(str) {
     if (!isPM && h === 12) h = 0;
 
     return new Date(`${datePart} ${h.toString().padStart(2, '0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`);
+}
+
+function _uuid() {
+    var d = Date.now();
+    if (typeof performance !== 'undefined' && typeof performance.now === 'function'){
+        d += performance.now(); //use high-precision timer if available
+    }
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = (d + Math.random() * 16) % 16 | 0;
+        d = Math.floor(d / 16);
+        return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+    });
 }
 </script>
 
