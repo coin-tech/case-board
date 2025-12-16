@@ -72,18 +72,33 @@ Papa.parse(sheetCSV, {
                         <div class="card-body">
                             <h5 class="card-title">${item['案名']}</h5>
                             <p class="card-text"><strong>發佈時間:</strong> ${item['時間戳記']}</p>
-                            <p class="card-text"><strong>描述:</strong> ${item['描述']}</p>
+                            <p class="card-text"><strong>描述:</strong> <br>${item['描述']}</p>
                             <p class="card-text"><strong>類別:</strong> ${item['類別']}</p>
                             <p class="card-text"><strong>預算:</strong> ${item['預算']}</p>
                             <p class="card-text"><strong>截止日期:</strong> ${item['截止日期']}</p>
-                            <p class="card-text"><strong>聯絡方式:</strong> ${item['聯絡方式']}</p>
+                            <p class="card-text"><strong>聯絡方式:</strong> <br>
+                                <span id="contact"></span>
+                            </p>
                         </div>
                     </div>
                 `;
             container.appendChild(div);
+            const contactText = item['聯絡方式'];
+            const formattedText = linkify(contactText);
+            document.getElementById('contact').innerHTML = formattedText;
         });
     }
 });
+
+/**
+ * 將文字中的 URL 轉成開新視窗連結
+ * @param {string} text - 要處理的文字
+ * @returns {string} - 處理後的 HTML
+ */
+function linkify(text) {
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    return text.replace(urlRegex, '<a href="$1" target="_blank">$1</a>');
+}
 
 // 先把上午/下午轉成24小時制
 function parseTime(str) {
